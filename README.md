@@ -20,10 +20,12 @@
 
 ## Установка
 
+### Обычная установка
+
 1. Клонируйте репозиторий:
 ```bash
-git clone <repository-url>
-cd ProductAnalytics
+git clone https://github.com/irving2019/ProductWBAnalytics.git
+cd ProductWBAnalytics
 ```
 
 2. Создайте виртуальное окружение:
@@ -49,13 +51,40 @@ python manage.py migrate
 python manage.py createsuperuser
 ```
 
+### Установка с Docker
+
+1. Клонируйте репозиторий:
+```bash
+git clone https://github.com/irving2019/ProductWBAnalytics.git
+cd ProductWBAnalytics
+```
+
+2. Запустите контейнеры:
+```bash
+docker-compose up --build
+```
+
+Приложение будет доступно по адресу: http://localhost:8000/
+
+### Установка с Docker (production)
+
+Для production используйте отдельный docker-compose файл с настройками безопасности.
+
 ## Запуск
+
+### Обычный запуск
 
 ```bash
 python manage.py runserver
 ```
 
-Приложение будет доступно по адресу: http://127.0.0.1:8000/
+### Запуск с Docker
+
+```bash
+docker-compose up
+```
+
+Приложение будет доступно по адресу: http://127.0.0.1:8000/ (обычный запуск) или http://localhost:8000/ (Docker)
 
 ## Использование
 
@@ -63,15 +92,26 @@ python manage.py runserver
 
 Для загрузки товаров с Wildberries используйте команду:
 
+**Обычный запуск:**
 ```bash
 python manage.py parse_wildberries "поисковый запрос" --pages 3
 ```
 
+**Docker:**
+```bash
+docker-compose exec web python manage.py parse_wildberries "поисковый запрос" --pages 3
+```
+
 Примеры:
 ```bash
+# Обычный запуск
 python manage.py parse_wildberries "смартфон" --pages 2
 python manage.py parse_wildberries "ноутбук" --pages 1
 python manage.py parse_wildberries "наушники" --pages 3
+
+# Docker
+docker-compose exec web python manage.py parse_wildberries "смартфон" --pages 2
+docker-compose exec web python manage.py parse_wildberries "ноутбук" --pages 1
 ```
 
 ### API Endpoints
@@ -115,6 +155,9 @@ ProductAnalytics/
 ├── templates/              # HTML шаблоны
 ├── static/                 # CSS/JS файлы
 ├── requirements.txt        # Зависимости
+├── Dockerfile             # Docker конфигурация
+├── docker-compose.yml     # Docker Compose
+├── .env.docker           # Переменные окружения для Docker
 └── manage.py
 ```
 
