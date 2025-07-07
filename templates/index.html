@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аналитика товаров Wildberries</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-primary">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1">
+                <i class="fas fa-chart-line me-2"></i>
+                Аналитика товаров Wildberries
+            </span>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Панель фильтров -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-filter me-2"></i>Фильтры</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Фильтр по цене -->
+                        <div class="mb-4">
+                            <label class="form-label">Диапазон цен (₽)</label>
+                            <div id="price-slider" class="mb-3"></div>
+                            <div class="d-flex justify-content-between">
+                                <input type="number" id="min-price" class="form-control form-control-sm" placeholder="Мин" style="width: 48%;">
+                                <input type="number" id="max-price" class="form-control form-control-sm" placeholder="Макс" style="width: 48%;">
+                            </div>
+                        </div>
+
+                        <!-- Фильтр по рейтингу -->
+                        <div class="mb-3">
+                            <label for="min-rating" class="form-label">Минимальный рейтинг</label>
+                            <select id="min-rating" class="form-select">
+                                <option value="">Любой</option>
+                                <option value="1">1+</option>
+                                <option value="2">2+</option>
+                                <option value="3">3+</option>
+                                <option value="4">4+</option>
+                                <option value="4.5">4.5+</option>
+                            </select>
+                        </div>
+
+                        <!-- Фильтр по отзывам -->
+                        <div class="mb-3">
+                            <label for="min-reviews" class="form-label">Минимальное количество отзывов</label>
+                            <select id="min-reviews" class="form-select">
+                                <option value="">Любое</option>
+                                <option value="10">10+</option>
+                                <option value="50">50+</option>
+                                <option value="100">100+</option>
+                                <option value="500">500+</option>
+                                <option value="1000">1000+</option>
+                            </select>
+                        </div>
+
+                        <!-- Поиск -->
+                        <div class="mb-3">
+                            <label for="search" class="form-label">Поиск по названию</label>
+                            <input type="text" id="search" class="form-control" placeholder="Введите название товара">
+                        </div>
+
+                        <button id="apply-filters" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-2"></i>Применить фильтры
+                        </button>
+                        <button id="reset-filters" class="btn btn-outline-secondary w-100 mt-2">
+                            <i class="fas fa-undo me-2"></i>Сбросить
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Основной контент -->
+            <div class="col-md-9">
+                <!-- Статистика -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <h6>Общая статистика</h6>
+                                <span id="total-products" class="badge bg-primary">Загрузка...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Таблица товаров -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5><i class="fas fa-table me-2"></i>Товары</h5>
+                        <div>
+                            <label for="sort-by" class="form-label me-2">Сортировка:</label>
+                            <select id="sort-by" class="form-select form-select-sm" style="width: auto; display: inline-block;">
+                                <option value="-created_at">По дате добавления</option>
+                                <option value="name">По названию (А-Я)</option>
+                                <option value="-name">По названию (Я-А)</option>
+                                <option value="price">По цене (возр.)</option>
+                                <option value="-price">По цене (убыв.)</option>
+                                <option value="rating">По рейтингу (возр.)</option>
+                                <option value="-rating">По рейтингу (убыв.)</option>
+                                <option value="reviews_count">По отзывам (возр.)</option>
+                                <option value="-reviews_count">По отзывам (убыв.)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Название товара</th>
+                                        <th>Цена</th>
+                                        <th>Цена со скидкой</th>
+                                        <th>Рейтинг</th>
+                                        <th>Отзывы</th>
+                                        <th>Скидка</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="products-table">
+                                    <tr>
+                                        <td colspan="6" class="text-center">
+                                            <div class="spinner-border" role="status">
+                                                <span class="visually-hidden">Загрузка...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Пагинация -->
+                        <nav aria-label="Навигация по страницам">
+                            <ul class="pagination justify-content-center" id="pagination">
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+
+                <!-- Графики -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-chart-bar me-2"></i>Распределение по ценам</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="price-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-chart-line me-2"></i>Скидка vs Рейтинг</h5>
+                            </div>
+                            <div class="card-body">
+                                <canvas id="discount-chart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>
